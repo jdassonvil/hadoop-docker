@@ -1,0 +1,69 @@
+version: '2'
+
+services:
+  namenode:
+    build: ./namenode
+    image: h4dev/hadoop-namenode
+    environment:
+      - HADOOP_NAMENODE=hdfs://0.0.0.0:9000
+    volumes:
+      - namenode-data:/var/hdfs/namenode
+    networks:
+      hadoop:
+        ipv4_address: 172.16.240.10
+
+  datanode:
+    build: ./datanode
+    image: h4dev/hadoop-datanode
+    networks:
+      - hadoop
+    environment:
+      - HADOOP_NAMENODE=hdfs://172.16.240.10:9000
+    extra_hosts:
+      - "namenode.docker-hadoop.net:172.16.240.10"
+
+  zookeeper:
+    build: ./zookeeper
+    image: h4dev/zookeeper
+    networks:
+      hadoop:
+        ipv4_address: 172.16.240.11
+
+  hbase-master:
+    build: ./hbase
+    image: h4dev/hbase
+    command: ./start.sh master start -localRegionServers=0
+    networks:
+      - hadoop
+    environment:
+      - HADOOP_NAMENODE=hdfs://172.16.240.10:9000
+      - ZOOKEEPER=172.16.240.11
+    extra_hosts:
+      - "namenode.docker-hadoop.net:172.16.240.10"
+
+#  hbase-regionserver:
+#    build: ./hbase
+#    image: h4dev/hbase
+#    command: ./start.sh regionserver start
+#    networks:
+#      hadoop:
+#        ipv4_address: 172.16.240.12
+#    environment:
+#      - HADOOP_NAMENODE=hdfs://172.16.240.10:9000
+#      - ZOOKEEPER=172.16.240.11
+#    extra_hosts:
+#      - "namenode.docker-hadoop.net:172.16.240.10"
+#      - "hbase-master.docker-hadoop.net:172.16.240.12"
+    
+volumes:
+  namenode-data:
+    external: true
+
+networks:
+  hadoop:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.240.0/24
+          gateway: 172.16.240.1
