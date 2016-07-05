@@ -11,16 +11,23 @@ services:
     networks:
       hadoop:
         ipv4_address: 172.16.240.10
+    extra_hosts:
+      - "namenode.docker-hadoop.net:172.16.240.10"
+      - "dn0.docker-hadoop.net:172.16.240.20"
 
   datanode:
     build: ./datanode
     image: h4dev/hadoop-datanode
     networks:
-      - hadoop
+      hadoop:
+        ipv4_address: 172.16.240.20
+    volumes:
+      - datanode-data:/data
     environment:
       - HADOOP_NAMENODE=hdfs://172.16.240.10:9000
     extra_hosts:
       - "namenode.docker-hadoop.net:172.16.240.10"
+      - "dn0.docker-hadoop.net:172.16.240.20"
 
   zookeeper:
     build: ./zookeeper
@@ -29,34 +36,27 @@ services:
       hadoop:
         ipv4_address: 172.16.240.11
 
-  hbase-master:
+  hbase:
     build: ./hbase
     image: h4dev/hbase
-    command: ./start.sh master start -localRegionServers=0
+    command: ./start.sh master start
     networks:
-      - hadoop
+      hadoop:
+        ipv4_address: 172.16.240.12
     environment:
       - HADOOP_NAMENODE=hdfs://172.16.240.10:9000
+      - HBASE_RS=localhost
       - ZOOKEEPER=172.16.240.11
     extra_hosts:
       - "namenode.docker-hadoop.net:172.16.240.10"
-
-#  hbase-regionserver:
-#    build: ./hbase
-#    image: h4dev/hbase
-#    command: ./start.sh regionserver start
-#    networks:
-#      hadoop:
-#        ipv4_address: 172.16.240.12
-#    environment:
-#      - HADOOP_NAMENODE=hdfs://172.16.240.10:9000
-#      - ZOOKEEPER=172.16.240.11
-#    extra_hosts:
-#      - "namenode.docker-hadoop.net:172.16.240.10"
-#      - "hbase-master.docker-hadoop.net:172.16.240.12"
+      - "dn0.docker-hadoop.net:172.16.240.20"
+      - "hbase-master.docker-hadoop.net:172.16.240.12"
+      - "zookeeper.docker-hadoop.net:172.16.240.11"
     
 volumes:
   namenode-data:
+    external: true
+  datanode-data:
     external: true
 
 networks:

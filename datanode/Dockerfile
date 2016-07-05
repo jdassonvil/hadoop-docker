@@ -1,4 +1,4 @@
-FROM hadoop-base
+FROM h4dev/hadoop-base
 
 ADD ./core-site.xml ./etc/hadoop/core-site.xml
 ADD ./start.sh .

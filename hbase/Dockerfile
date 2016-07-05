@@ -14,6 +14,7 @@ RUN curl -o hbase.tar.gz http://apache.claz.org/hbase/${HBASE_VERSION}/hbase-${H
 WORKDIR /opt/hbase-${HBASE_VERSION}
 
 ADD ./hbase-site.xml ./conf/hbase-site.xml
+ADD ./regionserver ./conf/regionserver
 ADD ./start.sh .
 RUN chmod +x ./start.sh
 
