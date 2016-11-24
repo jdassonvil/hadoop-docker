@@ -52,6 +52,17 @@ services:
       - "dn0.docker-hadoop.net:172.16.240.20"
       - "hbase-master.docker-hadoop.net:172.16.240.12"
       - "zookeeper.docker-hadoop.net:172.16.240.11"
+
+  flume:
+    build: ./flume
+    image: h4dev/flume
+    networks:
+      hadoop:
+        ipv4_address: 172.16.240.14
+    environment:
+      - HADOOP_NAMENODE=hdfs://172.16.240.10:9000
+    extra_hosts:
+      - "namenode.docker-hadoop.net:172.16.240.10"
     
 volumes:
   namenode-data:
